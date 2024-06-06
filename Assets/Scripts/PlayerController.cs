@@ -10,11 +10,15 @@ public class PlayerController : MonoBehaviour
     PlayerControls playerControls;
     Vector2 moveInput;
     Rigidbody2D myRigidbody2D;
+    Animator myAnimator;
+    SpriteRenderer mySpriteRenderer;
 
     void Awake()
     {
         playerControls = new PlayerControls();
         myRigidbody2D = GetComponent<Rigidbody2D>();
+        myAnimator = GetComponent<Animator>();
+        mySpriteRenderer = GetComponent<SpriteRenderer>();
     }
 
     void OnEnable()
@@ -29,12 +33,16 @@ public class PlayerController : MonoBehaviour
 
     void FixedUpdate()
     {
+        AdjustPlayerFacingDirection();
         Move();
     }
 
     void PlayerInput()
     {
         moveInput = playerControls.Movement.Move.ReadValue<Vector2>();
+
+        myAnimator.SetFloat("moveX", moveInput.x);
+        myAnimator.SetFloat("moveY", moveInput.y);
     }
 
     void Move()
@@ -42,4 +50,11 @@ public class PlayerController : MonoBehaviour
         myRigidbody2D.MovePosition(myRigidbody2D.position + moveInput * (moveSpeed * Time.fixedDeltaTime));
     }
 
+    void AdjustPlayerFacingDirection()
+    {
+        Vector2 mousePos = Input.mousePosition;
+        Vector2 playerPos = Camera.main.WorldToScreenPoint(myRigidbody2D.position);
+
+        mySpriteRenderer.flipX = mousePos.x < playerPos.x;
+    }
 }
