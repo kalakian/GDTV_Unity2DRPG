@@ -1,22 +1,21 @@
-using System.Collections;
-using System.Collections.Generic;
-using Unity.VisualScripting;
 using UnityEngine;
 
 public class PlayerController : MonoBehaviour
 {
     [SerializeField] float moveSpeed = 1;
+    [SerializeField] bool usingGamePad = true;
 
     PlayerControls playerControls;
     Vector2 moveInput;
-    Rigidbody2D myRigidbody2D;
+    Vector2 lookInput;
+    Rigidbody2D rb;
     Animator myAnimator;
     SpriteRenderer mySpriteRenderer;
 
     void Awake()
     {
         playerControls = new PlayerControls();
-        myRigidbody2D = GetComponent<Rigidbody2D>();
+        rb = GetComponent<Rigidbody2D>();
         myAnimator = GetComponent<Animator>();
         mySpriteRenderer = GetComponent<SpriteRenderer>();
     }
@@ -40,6 +39,10 @@ public class PlayerController : MonoBehaviour
     void PlayerInput()
     {
         moveInput = playerControls.Movement.Move.ReadValue<Vector2>();
+        if (usingGamePad)
+        {
+            lookInput = playerControls.Movement.Look.ReadValue<Vector2>();
+        }
 
         myAnimator.SetFloat("moveX", moveInput.x);
         myAnimator.SetFloat("moveY", moveInput.y);
@@ -47,14 +50,28 @@ public class PlayerController : MonoBehaviour
 
     void Move()
     {
-        myRigidbody2D.MovePosition(myRigidbody2D.position + moveInput * (moveSpeed * Time.fixedDeltaTime));
+        rb.MovePosition(rb.position + moveInput * (moveSpeed * Time.fixedDeltaTime));
     }
 
     void AdjustPlayerFacingDirection()
     {
-        Vector2 mousePos = Input.mousePosition;
-        Vector2 playerPos = Camera.main.WorldToScreenPoint(myRigidbody2D.position);
+        if (usingGamePad)
+        {
+            if (lookInput.x < -0.1)
+            {
+                mySpriteRenderer.flipX = true;
+            }
+            else if (lookInput.x > 0.1)
+            {
+                mySpriteRenderer.flipX = false;
+            }
+        }
+        else
+        {
+            Vector2 mousePos = Input.mousePosition;
+            Vector2 playerPos = Camera.main.WorldToScreenPoint(rb.position);
 
-        mySpriteRenderer.flipX = mousePos.x < playerPos.x;
+            mySpriteRenderer.flipX = mousePos.x < playerPos.x;
+        }
     }
 }
