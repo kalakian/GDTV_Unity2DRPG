@@ -1483,6 +1483,7 @@ GameObject:
   - component: {fileID: 1852216869}
   - component: {fileID: 1852216870}
   - component: {fileID: 1852216871}
+  - component: {fileID: 1852216872}
   m_Layer: 0
   m_Name: Player
   m_TagString: Untagged
@@ -1534,7 +1535,6 @@ MonoBehaviour:
   dashTime: 0.2
   dashCD: 0.25
   myTrailRenderer: {fileID: 658818128}
-  usingGamePad: 0
 --- !u!212 &1852216867
 SpriteRenderer:
   m_ObjectHideFlags: 0
@@ -1674,6 +1674,52 @@ SortingGroup:
   m_SortingLayer: 0
   m_SortingOrder: 0
   m_SortAtRoot: 0
+--- !u!114 &1852216872
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1852216864}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 62899f850307741f2a39c98a8b639597, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  m_Actions: {fileID: -944628639613478452, guid: d8303702a603bd34998938ee5c67aa20, type: 3}
+  m_NotificationBehavior: 1
+  m_UIInputModule: {fileID: 0}
+  m_DeviceLostEvent:
+    m_PersistentCalls:
+      m_Calls: []
+  m_DeviceRegainedEvent:
+    m_PersistentCalls:
+      m_Calls: []
+  m_ControlsChangedEvent:
+    m_PersistentCalls:
+      m_Calls: []
+  m_ActionEvents:
+  - m_PersistentCalls:
+      m_Calls: []
+    m_ActionId: 573c2dd8-69f1-4e4b-ba82-29fe34413acc
+    m_ActionName: Movement/Look[/XInputControllerWindows/rightStick,/Mouse/position]
+  - m_PersistentCalls:
+      m_Calls: []
+    m_ActionId: 8d4f26f4-22f3-450e-b544-d2fcaab9b023
+    m_ActionName: Player/Move[/Keyboard/w,/Keyboard/s,/Keyboard/a,/Keyboard/d,/Keyboard/upArrow,/Keyboard/downArrow,/Keyboard/leftArrow,/Keyboard/rightArrow,/XInputControllerWindows/leftStick]
+  - m_PersistentCalls:
+      m_Calls: []
+    m_ActionId: b8524b54-0d94-43cf-9a20-be3d96baeca7
+    m_ActionName: Player/Attack[/Mouse/leftButton,/XInputControllerWindows/rightTrigger]
+  - m_PersistentCalls:
+      m_Calls: []
+    m_ActionId: 3bc552d0-c1ea-48eb-9286-0ab86e84a512
+    m_ActionName: Player/Dash[/Keyboard/space,/XInputControllerWindows/leftShoulder]
+  m_NeverAutoSwitchControlSchemes: 0
+  m_DefaultControlScheme: 
+  m_DefaultActionMap: Player
+  m_SplitScreenIndex: -1
+  m_Camera: {fileID: 0}
 --- !u!4 &1947574422 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 6947167656602694861, guid: 98380c68cd662f940982953cbb6fa1ef, type: 3}

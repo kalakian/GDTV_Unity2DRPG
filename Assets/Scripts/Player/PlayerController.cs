@@ -1,5 +1,6 @@
 using System.Collections;
 using UnityEngine;
+using UnityEngine.InputSystem;
 
 public class PlayerController : MonoBehaviour
 {
@@ -11,11 +12,11 @@ public class PlayerController : MonoBehaviour
     [SerializeField] float dashTime = .2f;
     [SerializeField] float dashCD = .25f;
     [SerializeField] TrailRenderer myTrailRenderer;
-    [SerializeField] bool usingGamePad = true;
 
-    PlayerControls playerControls;
+    PlayerInput playerInput;
     Vector2 moveInput;
     Vector2 lookInput;
+    Vector2 mousePos;
     Rigidbody2D rb;
     Animator myAnimator;
     SpriteRenderer mySpriteRenderer;
@@ -27,7 +28,7 @@ public class PlayerController : MonoBehaviour
     void Awake()
     {
         Instance = this;
-        playerControls = new PlayerControls();
+        playerInput = GetComponent<PlayerInput>();
         rb = GetComponent<Rigidbody2D>();
         myAnimator = GetComponent<Animator>();
         mySpriteRenderer = GetComponent<SpriteRenderer>();
@@ -35,18 +36,7 @@ public class PlayerController : MonoBehaviour
 
     void Start()
     {
-        playerControls.Combat.Dash.performed += _ => Dash();
         startingMoveSpeed = moveSpeed;
-    }
-
-    void OnEnable()
-    {
-        playerControls.Enable();
-    }
-
-    void Update()
-    {
-        PlayerInput();
     }
 
     void FixedUpdate()
@@ -55,16 +45,24 @@ public class PlayerController : MonoBehaviour
         Move();
     }
 
-    void PlayerInput()
+    void OnMove(InputValue inputValue)
     {
-        moveInput = playerControls.Movement.Move.ReadValue<Vector2>();
-        if (usingGamePad)
-        {
-            lookInput = playerControls.Movement.Look.ReadValue<Vector2>();
-        }
+        moveInput = inputValue.Get<Vector2>();
 
         myAnimator.SetFloat("moveX", moveInput.x);
         myAnimator.SetFloat("moveY", moveInput.y);
+    }
+
+    void OnLook(InputValue inputValue)
+    {
+        if (playerInput.currentControlScheme == "Gamepad")
+        {
+            lookInput = inputValue.Get<Vector2>();
+        }
+        else
+        {
+            mousePos = Camera.main.ScreenToWorldPoint(inputValue.Get<Vector2>());
+        }
     }
 
     void Move()
@@ -74,30 +72,26 @@ public class PlayerController : MonoBehaviour
 
     void AdjustPlayerFacingDirection()
     {
-        if (usingGamePad)
+        if(playerInput.currentControlScheme == "KBM")
         {
-            if (lookInput.x < -0.1)
-            {
-                facingLeft = true;
-            }
-            else if (lookInput.x > 0.1)
-            {
-                facingLeft = false;
-            }
+            lookInput = mousePos - rb.position;
         }
-        else
-        {
-            Vector2 mousePos = Input.mousePosition;
-            Vector2 playerPos = Camera.main.WorldToScreenPoint(rb.position);
 
-            facingLeft = mousePos.x < playerPos.x;
+        if (lookInput.x < -0.1)
+        {
+            facingLeft = true;
         }
+        else if (lookInput.x > 0.1)
+        {
+            facingLeft = false;
+        }
+
         mySpriteRenderer.flipX = facingLeft;
     }
 
-    void Dash()
+    void OnDash(InputValue inputValue)
     {
-        if (!isDashing)
+        if (!isDashing && inputValue.isPressed)
         {
             isDashing = true;
             moveSpeed *= dashSpeed;

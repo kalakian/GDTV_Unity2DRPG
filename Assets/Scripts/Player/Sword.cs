@@ -1,5 +1,6 @@
 using System.Collections;
 using UnityEngine;
+using UnityEngine.InputSystem;
 
 public class Sword : MonoBehaviour
 {
@@ -8,12 +9,14 @@ public class Sword : MonoBehaviour
     [SerializeField] Transform weaponCollider;
     [SerializeField] float swordAttackCD = 0.5f;
 
-    PlayerControls playerControls;
+    PlayerInput playerInput;
     Animator myAnimator;
     PlayerController playerController;
     ActiveWeapon activeWeapon;
     bool attackButtonDown = false;
     bool isAttacking = false;
+    Vector2 lookInput;
+    Vector2 mousePos;
 
     GameObject slashAnim;
 
@@ -22,34 +25,18 @@ public class Sword : MonoBehaviour
         playerController = GetComponentInParent<PlayerController>();
         activeWeapon = GetComponentInParent<ActiveWeapon>();
         myAnimator = GetComponent<Animator>();
-        playerControls = new PlayerControls();
-    }
-
-    void OnEnable()
-    {
-        playerControls.Enable();
-    }
-
-    void Start()
-    {
-        playerControls.Combat.Attack.started += _ => StartAttacking();
-        playerControls.Combat.Attack.canceled += _ => StopAttacking();
+        playerInput = FindObjectOfType<PlayerInput>();
     }
 
     void Update()
     {
-        MouseFollowWithOffset();
+        LookWithOffset();
         Attack();
     }
 
-    void StartAttacking()
+    void OnAttack(InputValue inputValue)
     {
-        attackButtonDown = true;
-    }
-
-    void StopAttacking()
-    {
-        attackButtonDown = false;
+        attackButtonDown = inputValue.isPressed;
     }
 
     IEnumerator AttackCDRoutine()
@@ -91,19 +78,34 @@ public class Sword : MonoBehaviour
         slashAnim.GetComponent<SpriteRenderer>().flipX = playerController.FacingLeft;
     }
 
-    void MouseFollowWithOffset()
+    void OnLook(InputValue inputValue)
     {
-        Vector2 mousePos = Input.mousePosition;
-        Vector2 playerPos = Camera.main.WorldToScreenPoint(playerController.transform.position);
+        if (playerInput.currentControlScheme == "Gamepad")
+        {
+            lookInput = inputValue.Get<Vector2>();
+        }
+        else
+        {
+            mousePos = Camera.main.ScreenToWorldPoint(inputValue.Get<Vector2>());
+        }
+    }
 
-        float angle = Mathf.Atan2(mousePos.y, mousePos.x) * Mathf.Rad2Deg;
+    void LookWithOffset()
+    {
+        if (playerInput.currentControlScheme == "KBM")
+        {
+            lookInput = (mousePos - (Vector2)playerController.transform.position).normalized;
+        }
 
-        if(mousePos.x < playerPos.x)
+        float angle = Mathf.Atan(lookInput.y / lookInput.x) * Mathf.Rad2Deg;
+        angle = Mathf.Clamp(angle, -15, 15);
+
+        if (lookInput.x < -0.1)
         {
             activeWeapon.transform.rotation = Quaternion.Euler(0, -180, angle);
             weaponCollider.transform.rotation = Quaternion.Euler(0, -180, 0);
         }
-        else
+        else if (lookInput.x > 0.1)
         {
             activeWeapon.transform.rotation = Quaternion.Euler(0, 0, angle);
             weaponCollider.transform.rotation = Quaternion.Euler(0, 0, 0);
