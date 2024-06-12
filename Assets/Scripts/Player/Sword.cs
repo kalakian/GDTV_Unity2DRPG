@@ -1,3 +1,4 @@
+using System.Collections;
 using UnityEngine;
 
 public class Sword : MonoBehaviour
@@ -5,11 +6,14 @@ public class Sword : MonoBehaviour
     [SerializeField] GameObject slashAnimPrefab;
     [SerializeField] Transform slashAnimSpawnPoint;
     [SerializeField] Transform weaponCollider;
+    [SerializeField] float swordAttackCD = 0.5f;
 
     PlayerControls playerControls;
     Animator myAnimator;
     PlayerController playerController;
     ActiveWeapon activeWeapon;
+    bool attackButtonDown = false;
+    bool isAttacking = false;
 
     GameObject slashAnim;
 
@@ -28,21 +32,46 @@ public class Sword : MonoBehaviour
 
     void Start()
     {
-        playerControls.Combat.Attack.started += _ => Attack();
+        playerControls.Combat.Attack.started += _ => StartAttacking();
+        playerControls.Combat.Attack.canceled += _ => StopAttacking();
     }
 
     void Update()
     {
         MouseFollowWithOffset();
+        Attack();
+    }
+
+    void StartAttacking()
+    {
+        attackButtonDown = true;
+    }
+
+    void StopAttacking()
+    {
+        attackButtonDown = false;
+    }
+
+    IEnumerator AttackCDRoutine()
+    {
+        yield return new WaitForSeconds(swordAttackCD);
+        isAttacking = false;
     }
 
     void Attack()
     {
-        myAnimator.SetTrigger("Attack");
-        weaponCollider.gameObject.SetActive(true);
+        if (attackButtonDown && !isAttacking)
+        {
+            isAttacking = true;
 
-        slashAnim = Instantiate(slashAnimPrefab, slashAnimSpawnPoint.position, Quaternion.identity);
-        slashAnim.transform.parent = this.transform.parent;
+            myAnimator.SetTrigger("Attack");
+            weaponCollider.gameObject.SetActive(true);
+
+            slashAnim = Instantiate(slashAnimPrefab, slashAnimSpawnPoint.position, Quaternion.identity);
+            slashAnim.transform.parent = this.transform.parent;
+
+            StartCoroutine(AttackCDRoutine());
+        }
     }
 
     public void DoneAttackingAnimEvent()
