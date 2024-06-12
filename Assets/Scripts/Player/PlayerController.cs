@@ -3,7 +3,7 @@ using UnityEngine;
 
 public class PlayerController : MonoBehaviour
 {
-    public bool FacingLeft { get { return facingLeft; } set { facingLeft = value; } }
+    public bool FacingLeft { get { return facingLeft; } }
     public static PlayerController Instance;
 
     [SerializeField] float moveSpeed = 1;
@@ -19,6 +19,7 @@ public class PlayerController : MonoBehaviour
     Rigidbody2D rb;
     Animator myAnimator;
     SpriteRenderer mySpriteRenderer;
+    float startingMoveSpeed;
 
     bool facingLeft = false;
     bool isDashing = false;
@@ -35,6 +36,7 @@ public class PlayerController : MonoBehaviour
     void Start()
     {
         playerControls.Combat.Dash.performed += _ => Dash();
+        startingMoveSpeed = moveSpeed;
     }
 
     void OnEnable()
@@ -107,7 +109,7 @@ public class PlayerController : MonoBehaviour
     IEnumerator EndDashRoutine()
     {
         yield return new WaitForSeconds(dashTime);
-        moveSpeed /= dashSpeed;
+        moveSpeed = startingMoveSpeed;
         myTrailRenderer.emitting = false;
         yield return new WaitForSeconds(dashCD);
         isDashing = false;
