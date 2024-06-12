@@ -1,3 +1,4 @@
+using System.Collections;
 using UnityEngine;
 
 public class PlayerController : MonoBehaviour
@@ -6,6 +7,10 @@ public class PlayerController : MonoBehaviour
     public static PlayerController Instance;
 
     [SerializeField] float moveSpeed = 1;
+    [SerializeField] float dashSpeed = 4f;
+    [SerializeField] float dashTime = .2f;
+    [SerializeField] float dashCD = .25f;
+    [SerializeField] TrailRenderer myTrailRenderer;
     [SerializeField] bool usingGamePad = true;
 
     PlayerControls playerControls;
@@ -16,6 +21,7 @@ public class PlayerController : MonoBehaviour
     SpriteRenderer mySpriteRenderer;
 
     bool facingLeft = false;
+    bool isDashing = false;
 
     void Awake()
     {
@@ -24,6 +30,11 @@ public class PlayerController : MonoBehaviour
         rb = GetComponent<Rigidbody2D>();
         myAnimator = GetComponent<Animator>();
         mySpriteRenderer = GetComponent<SpriteRenderer>();
+    }
+
+    void Start()
+    {
+        playerControls.Combat.Dash.performed += _ => Dash();
     }
 
     void OnEnable()
@@ -80,5 +91,25 @@ public class PlayerController : MonoBehaviour
             facingLeft = mousePos.x < playerPos.x;
         }
         mySpriteRenderer.flipX = facingLeft;
+    }
+
+    void Dash()
+    {
+        if (!isDashing)
+        {
+            isDashing = true;
+            moveSpeed *= dashSpeed;
+            myTrailRenderer.emitting = true;
+            StartCoroutine(EndDashRoutine());
+        }
+    }
+
+    IEnumerator EndDashRoutine()
+    {
+        yield return new WaitForSeconds(dashTime);
+        moveSpeed /= dashSpeed;
+        myTrailRenderer.emitting = false;
+        yield return new WaitForSeconds(dashCD);
+        isDashing = false;
     }
 }
