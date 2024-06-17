@@ -11,7 +11,6 @@ public class Sword : MonoBehaviour
 
     PlayerInput playerInput;
     Animator myAnimator;
-    PlayerController playerController;
     ActiveWeapon activeWeapon;
     bool attackButtonDown = false;
     bool isAttacking = false;
@@ -22,7 +21,6 @@ public class Sword : MonoBehaviour
 
     void Awake()
     {
-        playerController = GetComponentInParent<PlayerController>();
         activeWeapon = GetComponentInParent<ActiveWeapon>();
         myAnimator = GetComponent<Animator>();
         playerInput = FindObjectOfType<PlayerInput>();
@@ -70,12 +68,12 @@ public class Sword : MonoBehaviour
     {
         slashAnim.gameObject.transform.rotation = Quaternion.Euler(-180, 0, 0);
 
-        slashAnim.GetComponent<SpriteRenderer>().flipX = playerController.FacingLeft;
+        slashAnim.GetComponent<SpriteRenderer>().flipX = PlayerController.Instance.FacingLeft;
     }
 
     public void SwingDownFlipAnimEvent()
     {
-        slashAnim.GetComponent<SpriteRenderer>().flipX = playerController.FacingLeft;
+        slashAnim.GetComponent<SpriteRenderer>().flipX = PlayerController.Instance.FacingLeft;
     }
 
     void OnLook(InputValue inputValue)
@@ -94,7 +92,7 @@ public class Sword : MonoBehaviour
     {
         if (playerInput.currentControlScheme == "KBM")
         {
-            lookInput = (mousePos - (Vector2)playerController.transform.position).normalized;
+            lookInput = (mousePos - (Vector2)PlayerController.Instance.transform.position).normalized;
         }
 
         float angle = Mathf.Atan(lookInput.y / lookInput.x) * Mathf.Rad2Deg;
